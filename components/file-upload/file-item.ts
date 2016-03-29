@@ -1,3 +1,4 @@
+import {NgZone} from 'angular2/core';
 import {FileLikeObject} from './file-like-object';
 import {FileUploader} from './file-uploader';
 
@@ -19,7 +20,13 @@ export class FileItem {
   public progress:number = 0;
   public index:number = null;
 
-  constructor(private uploader:FileUploader, private some:any, private options:any) {
+
+  constructor(
+    private _zone:NgZone,
+    private uploader:FileUploader,
+    private some:any,
+    private options:any
+  ) {
     this.file = new FileLikeObject(some);
     this._file = some;
     this.url = uploader.url;
@@ -61,54 +68,69 @@ export class FileItem {
   }
 
   private _onBeforeUpload() {
-    this.isReady = true;
-    this.isUploading = true;
-    this.isUploaded = false;
-    this.isSuccess = false;
-    this.isCancel = false;
-    this.isError = false;
-    this.progress = 0;
+    this._zone.run(() => {
+      this.isReady = true;
+      this.isUploading = true;
+      this.isUploaded = false;
+      this.isSuccess = false;
+      this.isCancel = false;
+      this.isError = false;
+      this.progress = 0;
+    });
+
     this.onBeforeUpload();
   }
 
   private _onProgress(progress:number) {
-    this.progress = progress;
+    this._zone.run(() => {
+      this.progress = progress;
+    });
+
     this.onProgress(progress);
   }
 
   private _onSuccess(response:any, status:any, headers:any) {
-    this.isReady = false;
-    this.isUploading = false;
-    this.isUploaded = true;
-    this.isSuccess = true;
-    this.isCancel = false;
-    this.isError = false;
-    this.progress = 100;
-    this.index = null;
+    this._zone.run(() => {
+      this.isReady = false;
+      this.isUploading = false;
+      this.isUploaded = true;
+      this.isSuccess = true;
+      this.isCancel = false;
+      this.isError = false;
+      this.progress = 100;
+      this.index = null;
+    });
+
     this.onSuccess(response, status, headers);
   }
 
   private _onError(response:any, status:any, headers:any) {
-    this.isReady = false;
-    this.isUploading = false;
-    this.isUploaded = true;
-    this.isSuccess = false;
-    this.isCancel = false;
-    this.isError = true;
-    this.progress = 0;
-    this.index = null;
+    this._zone.run(() => {
+      this.isReady = false;
+      this.isUploading = false;
+      this.isUploaded = true;
+      this.isSuccess = false;
+      this.isCancel = false;
+      this.isError = true;
+      this.progress = 0;
+      this.index = null;
+    });
+
     this.onError(response, status, headers);
   }
 
   private _onCancel(response:any, status:any, headers:any) {
-    this.isReady = false;
-    this.isUploading = false;
-    this.isUploaded = false;
-    this.isSuccess = false;
-    this.isCancel = true;
-    this.isError = false;
-    this.progress = 0;
-    this.index = null;
+    this._zone.run(() => {
+      this.isReady = false;
+      this.isUploading = false;
+      this.isUploaded = false;
+      this.isSuccess = false;
+      this.isCancel = true;
+      this.isError = false;
+      this.progress = 0;
+      this.index = null;
+    });
+
     this.onCancel(response, status, headers);
   }
 
@@ -122,6 +144,9 @@ export class FileItem {
 
   private _prepareToUploading() {
     this.index = this.index || ++this.uploader._nextIndex;
-    this.isReady = true;
+
+    this._zone.run(() => {
+      this.isReady = true;
+    });
   }
 }
